@@ -1,0 +1,36 @@
+{
+  "packageName": "react-render-budget",
+  "version": "0.1.0",
+  "description": "Measure React render counts and render budgets in Playwright tests.",
+  "repositoryUrl": "https://github.com/moritzbrantner/react-render-budget",
+  "exportedEntrypoints": [
+    ".",
+    "./react",
+    "./playwright"
+  ],
+  "metrics": {
+    "sourceFiles": 12,
+    "apiEntrypoints": 3,
+    "unitTestFiles": 5,
+    "unitTests": 12,
+    "e2eSpecFiles": 1,
+    "e2eTests": 8,
+    "benchmarkFiles": 1,
+    "benchmarkWorkloads": 2,
+    "workflowFiles": 3
+  },
+  "workflows": [
+    {
+      "file": ".github/workflows/deploy-pages.yml",
+      "name": "Deploy Pages"
+    },
+    {
+      "file": ".github/workflows/performance.yml",
+      "name": "Performance"
+    },
+    {
+      "file": ".github/workflows/validate.yml",
+      "name": "Validate"
+    }
+  ]
+}

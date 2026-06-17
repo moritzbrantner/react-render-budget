@@ -1,0 +1,33 @@
+name: Deploy Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-pages:
+    permissions:
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
+      packages: read
+    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.3
+    with:
+      node_version: "20"
+      bun_version: ""
+      install_command: npm ci
+      cache_bun: false
+      cache_node: true
+      npm_cache_dependency_path: package-lock.json
+      build_command: npm run pages:build
+      artifact_path: pages-dist

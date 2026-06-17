@@ -28,7 +28,7 @@ jobs:
       cache_node: true
       npm_cache_dependency_path: package-lock.json
       typecheck_command: npm run typecheck
-      build_command: npm run build
+      build_command: npm run build && npm run pages:build
       unit_test_command: npm run test:unit
 
   package-validation:
