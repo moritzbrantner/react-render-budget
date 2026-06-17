@@ -34,9 +34,14 @@
     "clean": "rm -rf dist",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "npm run test:unit",
+    "test:unit": "vitest run",
+    "test:e2e": "npm run build && npm --prefix examples/playwright-react ci && npm --prefix examples/playwright-react test",
     "test:watch": "vitest",
-    "pack:dry-run": "npm pack --dry-run"
+    "bench": "mkdir -p benchmark-results && vitest bench --run --outputJson benchmark-results/vitest-bench.json",
+    "bench:watch": "vitest bench",
+    "pack:dry-run": "npm pack --dry-run",
+    "pack:check": "npm run build && npm run pack:dry-run"
   },
   "peerDependencies": {
     "@playwright/test": ">=1.40.0",

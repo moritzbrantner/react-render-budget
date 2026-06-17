@@ -1,0 +1,33 @@
+name: Performance
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: "18 3 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  performance-validation:
+    permissions:
+      contents: read
+      packages: read
+    uses: moritzbrantner/reusable-workflows/.github/workflows/performance-validation.yml@workflow-standard-v1.3
+    with:
+      node_version: "20"
+      bun_version: ""
+      install_command: npm ci
+      cache_bun: false
+      cache_node: true
+      npm_cache_dependency_path: package-lock.json
+      benchmark_command: npm run bench
+      artifact_paths: benchmark-results
+      upload_artifacts_on: always

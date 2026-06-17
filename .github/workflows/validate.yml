@@ -1,0 +1,66 @@
+name: Validate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast-validation:
+    permissions:
+      contents: read
+      packages: read
+    uses: moritzbrantner/reusable-workflows/.github/workflows/fast-validation.yml@workflow-standard-v1.3
+    with:
+      node_version: "20"
+      bun_version: ""
+      install_command: npm ci
+      cache_bun: false
+      cache_node: true
+      npm_cache_dependency_path: package-lock.json
+      typecheck_command: npm run typecheck
+      build_command: npm run build
+      unit_test_command: npm run test:unit
+
+  package-validation:
+    permissions:
+      contents: read
+      packages: read
+    uses: moritzbrantner/reusable-workflows/.github/workflows/integration-validation.yml@workflow-standard-v1.3
+    with:
+      node_version: "20"
+      bun_version: ""
+      install_command: npm ci
+      cache_bun: false
+      cache_node: true
+      npm_cache_dependency_path: package-lock.json
+      package_check_command: npm run pack:check
+
+  e2e-validation:
+    permissions:
+      contents: read
+      packages: read
+    uses: moritzbrantner/reusable-workflows/.github/workflows/e2e-validation.yml@workflow-standard-v1.3
+    with:
+      node_version: "20"
+      bun_version: ""
+      install_command: npm ci
+      pre_command: npx playwright install --with-deps chromium
+      e2e_command: npm run test:e2e
+      install_playwright: false
+      cache_bun: false
+      cache_node: true
+      npm_cache_dependency_path: package-lock.json
+      artifact_paths: |
+        examples/playwright-react/playwright-report
+        examples/playwright-react/test-results
+      upload_artifacts_on: failure

@@ -3,3 +3,4 @@ dist
 *.tgz
 playwright-report
 test-results
+benchmark-results

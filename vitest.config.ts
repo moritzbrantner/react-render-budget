@@ -6,5 +6,8 @@ export default defineConfig({
     globals: false,
     include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     setupFiles: ["tests/setup.ts"],
+    benchmark: {
+      include: ["benchmarks/**/*.bench.ts"],
+    },
   },
 });
