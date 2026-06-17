@@ -100,6 +100,28 @@ const benchmarkRows = [
   },
 ];
 
+const ticTacToeComponents = [
+  "TicTacToeGame",
+  "TicTacToeStatus",
+  "TicTacToeBoard",
+  "TicTacToeCell1",
+  "TicTacToeCell2",
+  "TicTacToeCell3",
+  "TicTacToeCell4",
+  "TicTacToeCell5",
+  "TicTacToeCell6",
+  "TicTacToeCell7",
+  "TicTacToeCell8",
+  "TicTacToeCell9",
+];
+
+const ticTacToeMoveRenders = new Set([
+  "TicTacToeGame",
+  "TicTacToeStatus",
+  "TicTacToeBoard",
+  "TicTacToeCell1",
+]);
+
 function App() {
   return (
     <>
@@ -160,6 +182,55 @@ function App() {
                 <span>{surface.metric}</span>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="section section--split" id="examples" aria-labelledby="examples-title">
+          <div>
+            <p className="eyebrow">Example</p>
+            <h2 id="examples-title">Tic Tac Toe makes render scope visible.</h2>
+            <p className="section-note">
+              The Playwright example mounts the board, records one startup render for every named
+              component, resets stats, then clicks the first cell. Memoized cells with unchanged
+              props stay out of the move snapshot.
+            </p>
+          </div>
+
+          <div className="tic-tac-toe-example">
+            <div className="tic-tac-toe-board" aria-label="Tic Tac Toe first move">
+              {Array.from({ length: 9 }, (_, index) => (
+                <span data-changed={index === 0 ? "true" : "false"} key={index}>
+                  {index === 0 ? "X" : ""}
+                </span>
+              ))}
+            </div>
+
+            <div className="render-comparison" aria-label="Tic Tac Toe render counts">
+              <div className="render-comparison__header">
+                <span>Component</span>
+                <span>Startup</span>
+                <span>After X</span>
+              </div>
+              {ticTacToeComponents.map((component) => (
+                <div className="render-comparison__row" key={component}>
+                  <code>{component}</code>
+                  <strong>1</strong>
+                  <strong>{ticTacToeMoveRenders.has(component) ? "1" : "0"}</strong>
+                </div>
+              ))}
+            </div>
+
+            <pre className="code-panel code-panel--compact" tabIndex={0}>
+              <code>{`await page.goto("/tic-tac-toe");
+expect((await getRenderStats(page)).components.TicTacToeCell9).toBe(1);
+
+await resetRenderStats(page);
+await page.getByRole("button", { name: "Cell 1" }).click();
+
+const stats = await getRenderStats(page);
+expect(stats.components.TicTacToeCell1).toBe(1);
+expect(stats.components.TicTacToeCell2).toBeUndefined();`}</code>
+            </pre>
           </div>
         </section>
 
@@ -258,6 +329,7 @@ function SiteHeader() {
         <nav className="nav" aria-label="Site">
           <a href="#metrics">Metrics</a>
           <a href="#api">API</a>
+          <a href="#examples">Examples</a>
           <a href="#workflows">Workflows</a>
           <a href="#benchmarks">Benchmarks</a>
         </nav>

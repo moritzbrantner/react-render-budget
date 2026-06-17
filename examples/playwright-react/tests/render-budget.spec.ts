@@ -161,3 +161,48 @@ test("budget failures are observable through the Playwright helper", async ({
     'Component "BudgetCounter" metric "renders" exceeded budget: actual 1, expected max 0.',
   );
 });
+
+test("tic tac toe startup and first move render only the expected components", async ({
+  page,
+}) => {
+  await page.goto("/tic-tac-toe");
+
+  const startupStats = await getRenderStats(page);
+  expect(startupStats.profiler.TicTacToeExample?.mounts).toBe(1);
+  expect(startupStats.profiler.TicTacToeExample?.updates).toBe(0);
+  expect(startupStats.components.TicTacToeGame).toBe(1);
+  expect(startupStats.components.TicTacToeStatus).toBe(1);
+  expect(startupStats.components.TicTacToeBoard).toBe(1);
+
+  for (let index = 1; index <= 9; index += 1) {
+    expect(startupStats.components[`TicTacToeCell${index}`]).toBe(1);
+  }
+
+  await resetRenderStats(page);
+  await page.getByRole("button", { name: "Cell 1" }).click();
+
+  const moveStats = await getRenderStats(page);
+  expect(moveStats.profiler.TicTacToeExample?.updates).toBe(1);
+  expect(moveStats.components.TicTacToeGame).toBe(1);
+  expect(moveStats.components.TicTacToeStatus).toBe(1);
+  expect(moveStats.components.TicTacToeBoard).toBe(1);
+  expect(moveStats.components.TicTacToeCell1).toBe(1);
+
+  for (let index = 2; index <= 9; index += 1) {
+    expect(moveStats.components[`TicTacToeCell${index}`]).toBeUndefined();
+  }
+
+  await expectRenderBudget(page, {
+    profiler: {
+      TicTacToeExample: {
+        updates: { max: 1 },
+      },
+    },
+    components: {
+      TicTacToeGame: 1,
+      TicTacToeStatus: 1,
+      TicTacToeBoard: 1,
+      TicTacToeCell1: 1,
+    },
+  });
+});

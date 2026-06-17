@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from "react";
+import { memo, useCallback, useState, type ReactElement } from "react";
 import { createRoot } from "react-dom/client";
 import { RenderProfiler, withRenderCounter } from "react-render-budget/react";
 
@@ -99,6 +99,121 @@ const CountedBudgetCounter = withRenderCounter(
   BudgetCounter,
   "BudgetCounter",
 );
+
+type Player = "X" | "O";
+type SquareValue = Player | null;
+
+interface TicTacToeCellProps {
+  index: number;
+  value: SquareValue;
+  onSelect: (index: number) => void;
+}
+
+function TicTacToeCell({ index, onSelect, value }: TicTacToeCellProps) {
+  return (
+    <button
+      type="button"
+      aria-label={`Cell ${index + 1}`}
+      onClick={() => onSelect(index)}
+    >
+      {value ?? "-"}
+    </button>
+  );
+}
+
+const countedTicTacToeCells = Array.from({ length: 9 }, (_, index) =>
+  memo(withRenderCounter(TicTacToeCell, `TicTacToeCell${index + 1}`)),
+);
+
+function TicTacToeBoard({
+  onSelect,
+  squares,
+}: {
+  onSelect: (index: number) => void;
+  squares: SquareValue[];
+}) {
+  return (
+    <div role="grid" aria-label="Tic Tac Toe board">
+      {squares.map((square, index) => {
+        const CountedCell = countedTicTacToeCells[index];
+
+        return (
+          <CountedCell
+            index={index}
+            key={index}
+            onSelect={onSelect}
+            value={square}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
+const CountedTicTacToeBoard = withRenderCounter(
+  TicTacToeBoard,
+  "TicTacToeBoard",
+);
+
+function TicTacToeStatus({ squares }: { squares: SquareValue[] }) {
+  const winner = calculateWinner(squares);
+
+  if (winner) {
+    return <p>Winner: {winner}</p>;
+  }
+
+  return <p>Next player: {getNextPlayer(squares)}</p>;
+}
+
+const CountedTicTacToeStatus = withRenderCounter(
+  TicTacToeStatus,
+  "TicTacToeStatus",
+);
+
+function TicTacToeGame({
+  onSelect,
+  squares,
+}: {
+  onSelect: (index: number) => void;
+  squares: SquareValue[];
+}) {
+  return (
+    <RenderProfiler id="TicTacToeExample">
+      <CountedTicTacToeStatus squares={squares} />
+      <CountedTicTacToeBoard onSelect={onSelect} squares={squares} />
+    </RenderProfiler>
+  );
+}
+
+const CountedTicTacToeGame = withRenderCounter(
+  TicTacToeGame,
+  "TicTacToeGame",
+);
+
+function calculateWinner(squares: SquareValue[]): Player | null {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  for (const [a, b, c] of lines) {
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+
+  return null;
+}
+
+function getNextPlayer(squares: SquareValue[]): Player {
+  return squares.filter(Boolean).length % 2 === 0 ? "X" : "O";
+}
 
 function CounterPage() {
   const [count, setCount] = useState(0);
@@ -221,6 +336,26 @@ function BudgetFailurePage() {
   );
 }
 
+function TicTacToePage() {
+  const [squares, setSquares] = useState<SquareValue[]>(() =>
+    Array<SquareValue>(9).fill(null),
+  );
+
+  const handleSelect = useCallback((index: number) => {
+    setSquares((current) => {
+      if (current[index] !== null || calculateWinner(current)) {
+        return current;
+      }
+
+      const next = current.slice();
+      next[index] = getNextPlayer(current);
+      return next;
+    });
+  }, []);
+
+  return <CountedTicTacToeGame onSelect={handleSelect} squares={squares} />;
+}
+
 const pages: Record<string, () => ReactElement> = {
   "/": CounterPage,
   "/reset-isolation": ResetIsolationPage,
@@ -230,6 +365,7 @@ const pages: Record<string, () => ReactElement> = {
   "/multiple-counters": MultipleCountersPage,
   "/metadata": MetadataPage,
   "/budget-failure": BudgetFailurePage,
+  "/tic-tac-toe": TicTacToePage,
 };
 
 export function App() {

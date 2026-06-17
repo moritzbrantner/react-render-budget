@@ -325,6 +325,12 @@ h3 {
   font-size: 1.04rem;
 }
 
+.section-note {
+  max-width: 34rem;
+  margin: 1rem 0 0;
+  color: var(--muted);
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -512,6 +518,84 @@ h3 {
   padding: 1rem;
 }
 
+.tic-tac-toe-example {
+  display: grid;
+  grid-template-columns: minmax(210px, 0.65fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.tic-tac-toe-board,
+.render-comparison,
+.tic-tac-toe-example .code-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.tic-tac-toe-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  aspect-ratio: 1;
+  padding: 0.85rem;
+}
+
+.tic-tac-toe-board span {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-strong);
+  font-size: 2rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.tic-tac-toe-board span[data-changed="true"] {
+  border-color: rgb(31 122 77 / 45%);
+  background: #e7f5ec;
+  color: var(--green);
+}
+
+.render-comparison {
+  overflow: hidden;
+}
+
+.render-comparison__header,
+.render-comparison__row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1fr) 78px 78px;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.55rem 0.8rem;
+}
+
+.render-comparison__header {
+  background: var(--ink);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.render-comparison__row + .render-comparison__row {
+  border-top: 1px solid var(--line);
+}
+
+.render-comparison__row strong {
+  border-radius: 999px;
+  background: var(--panel-strong);
+  color: var(--ink);
+  padding: 0.2rem 0.4rem;
+  text-align: center;
+}
+
+.tic-tac-toe-example .code-panel {
+  grid-column: 1 / -1;
+}
+
 .code-panel {
   overflow: auto;
   min-width: 0;
@@ -528,6 +612,11 @@ h3 {
   background: transparent;
   color: inherit;
   padding: 0;
+}
+
+.code-panel--compact {
+  box-shadow: none;
+  font-size: 0.86rem;
 }
 
 @media (max-width: 920px) {
@@ -554,7 +643,8 @@ h3 {
   .hero,
   .section--split,
   .section__heading,
-  .benchmark-panel {
+  .benchmark-panel,
+  .tic-tac-toe-example {
     grid-template-columns: 1fr;
   }
 
@@ -611,5 +701,10 @@ h3 {
 
   .button {
     width: 100%;
+  }
+
+  .render-comparison__header,
+  .render-comparison__row {
+    grid-template-columns: minmax(120px, 1fr) 64px 64px;
   }
 }
