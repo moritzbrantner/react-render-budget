@@ -1,6 +1,6 @@
 import { createElement, type Attributes, type ComponentType } from "react";
 
-import { incrementComponentRenderCount } from "../core/globals";
+import { incrementComponentRenderCount } from "../core/browserPageStatsStore";
 
 export function withRenderCounter<Props extends object>(
   Component: ComponentType<Props>,

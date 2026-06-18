@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  getRenderStatsStore,
+  getBrowserPageStatsStore,
   incrementComponentRenderCount,
   readRenderStatsSnapshot,
   recordProfilerRender,
-  resetBrowserRenderStats,
-} from "../src/core/globals";
+  resetBrowserPageStatsStore,
+} from "../src/core/browserPageStatsStore";
 
-describe("browser render stats globals", () => {
+describe("browser-page stats store", () => {
   it("initializes render stats lazily", () => {
-    resetBrowserRenderStats();
+    resetBrowserPageStatsStore();
 
-    const store = getRenderStatsStore();
+    const store = getBrowserPageStatsStore();
 
     expect(store).toEqual({
       profiler: {},
@@ -23,7 +23,7 @@ describe("browser render stats globals", () => {
   });
 
   it("records profiler events and component render counts", () => {
-    resetBrowserRenderStats();
+    resetBrowserPageStatsStore();
 
     recordProfilerRender({
       id: "TimelineEditor",
@@ -60,10 +60,10 @@ describe("browser render stats globals", () => {
   });
 
   it("resets render stats", () => {
-    resetBrowserRenderStats();
+    resetBrowserPageStatsStore();
     incrementComponentRenderCount("TimelineItem");
 
-    resetBrowserRenderStats();
+    resetBrowserPageStatsStore();
 
     expect(readRenderStatsSnapshot()).toEqual({
       profiler: {},

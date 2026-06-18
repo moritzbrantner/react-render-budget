@@ -60,14 +60,14 @@ describe("render budget evaluation", () => {
     }
 
     expect(message).toContain(
-      'Profiler "TimelineEditor" metric "updates" exceeded budget: actual 2, expected max 1.',
+      'Profiler budget target "TimelineEditor" metric "updates" exceeded budget: actual 2, expected max 1.',
     );
     expect(message).toContain(
-      'Component "TimelineItem" metric "renders" exceeded budget: actual 8, expected max 5.',
+      'Component budget target "TimelineItem" metric "renders" exceeded budget: actual 8, expected max 5.',
     );
   });
 
-  it("reports missing profiler ids with available profiler stats", () => {
+  it("reports missing profiler budget target ids with available profiler budget targets", () => {
     const violations = evaluateRenderBudget(snapshot, {
       profiler: {
         MissingProfiler: {
@@ -77,7 +77,7 @@ describe("render budget evaluation", () => {
     });
 
     expect(violations[0]?.message).toContain(
-      'Profiler "MissingProfiler" was not found. Available profilers: TimelineEditor.',
+      'Profiler budget target "MissingProfiler" was not found. Available profiler budget targets: TimelineEditor.',
     );
   });
 
@@ -89,7 +89,7 @@ describe("render budget evaluation", () => {
     });
 
     expect(violations[0]?.message).toContain(
-      'Component "MissingComponent" was not found. Available components: TimelineItem, LayerRow.',
+      'Component budget target "MissingComponent" was not found. Available component budget targets: TimelineItem, LayerRow.',
     );
   });
 });

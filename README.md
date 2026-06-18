@@ -50,6 +50,12 @@ export function TestApp() {
 
 It records committed React Profiler events in an internal browser-page stats store. Prefer `RenderProfiler` as the default budget target for committed subtree work.
 
+## Terminology
+
+A render budget is an upper bound on allowed render work during a measurement window. A measurement window starts after `resetRenderStats(page)` and covers the scenario you measure.
+
+A budget target is the string key used for profiler stats or component render counts. Profiler budget targets come from `RenderProfiler` ids, and component budget targets come from `withRenderCounter` names.
+
 ## Component Render Counter
 
 Use `withRenderCounter` when you need exact component function render calls:
@@ -115,7 +121,7 @@ await expectRenderBudget(page, {
 
 Reset stats immediately before the scenario being measured. `resetRenderStats(page)` clears all render stats on the page and starts a new measurement window. Initial page load and mount work often has different characteristics from the interaction you want to budget.
 
-Budget targets must be present in the measurement window. If a requested profiler id or component counter name has no recorded stats, `expectRenderBudget` fails instead of treating the target as zero renders.
+Budget targets must be present in the measurement window. If a requested profiler budget target id or component budget target name has no recorded stats, `expectRenderBudget` fails instead of treating the target as zero renders.
 
 ## Playwright Fixture
 
@@ -164,7 +170,7 @@ The fixture works with Playwright component tests and normal browser/e2e tests, 
 
 ## Metrics
 
-Profiler stats are stored by budget target id:
+Profiler stats are stored by profiler budget target id:
 
 - `commits`: total committed Profiler callbacks.
 - `mounts`: commits where the Profiler phase is `mount`.
@@ -176,7 +182,7 @@ Profiler stats are stored by budget target id:
 
 `metadata` is diagnostic event data. It is not used for aggregation, grouping, or budget evaluation.
 
-Component counts are stored by budget target name:
+Component counts are stored by component budget target name:
 
 - `components[name]`: number of times the wrapped component function rendered.
 

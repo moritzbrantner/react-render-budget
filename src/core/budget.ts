@@ -39,7 +39,7 @@ export function evaluateRenderBudget(
         id,
         metric: "profiler",
         availableIds,
-        message: `Profiler "${id}" was not found. Available profilers: ${formatAvailable(
+        message: `Profiler budget target "${id}" was not found. Available profiler budget targets: ${formatAvailable(
           availableIds,
         )}.`,
       });
@@ -64,7 +64,7 @@ export function evaluateRenderBudget(
           actual,
           max,
           availableIds,
-          message: `Profiler "${id}" metric "${metric}" exceeded budget: actual ${actual}, expected max ${max}.`,
+          message: `Profiler budget target "${id}" metric "${metric}" exceeded budget: actual ${actual}, expected max ${max}.`,
         });
       }
     }
@@ -80,7 +80,7 @@ export function evaluateRenderBudget(
         id,
         metric: "renders",
         availableIds,
-        message: `Component "${id}" was not found. Available components: ${formatAvailable(
+        message: `Component budget target "${id}" was not found. Available component budget targets: ${formatAvailable(
           availableIds,
         )}.`,
       });
@@ -97,7 +97,7 @@ export function evaluateRenderBudget(
         actual,
         max,
         availableIds,
-        message: `Component "${id}" metric "renders" exceeded budget: actual ${actual}, expected max ${max}.`,
+        message: `Component budget target "${id}" metric "renders" exceeded budget: actual ${actual}, expected max ${max}.`,
       });
     }
   }

@@ -5,7 +5,7 @@ import {
   type ReactNode,
 } from "react";
 
-import { recordProfilerRender } from "../core/globals";
+import { recordProfilerRender } from "../core/browserPageStatsStore";
 import type { ProfilerRenderPhase, RenderMetadata } from "../core/types";
 
 export interface RenderProfilerProps {

@@ -2,7 +2,7 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { resetBrowserRenderStats } from "../src/core/globals";
+import { resetBrowserPageStatsStore } from "../src/core/browserPageStatsStore";
 import { RenderProfiler } from "../src/react/RenderProfiler";
 import { withRenderCounter } from "../src/react/withRenderCounter";
 
@@ -15,11 +15,11 @@ const CountedCounter = withRenderCounter(Counter, "Counter");
 describe("React instrumentation", () => {
   afterEach(() => {
     document.body.innerHTML = "";
-    resetBrowserRenderStats();
+    resetBrowserPageStatsStore();
   });
 
   it("records committed subtree renders and component function renders", async () => {
-    resetBrowserRenderStats();
+    resetBrowserPageStatsStore();
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);
@@ -57,7 +57,7 @@ describe("React instrumentation", () => {
   });
 
   it("does not create profiler stats when disabled", async () => {
-    resetBrowserRenderStats();
+    resetBrowserPageStatsStore();
     const container = document.createElement("div");
     document.body.append(container);
     const root = createRoot(container);

@@ -3,9 +3,9 @@ import { bench, describe } from "vitest";
 import { evaluateRenderBudget } from "../src/core/budget";
 import {
   recordProfilerRender,
-  resetBrowserRenderStats,
   readRenderStatsSnapshot,
-} from "../src/core/globals";
+  resetBrowserPageStatsStore,
+} from "../src/core/browserPageStatsStore";
 import type { RenderBudget, RenderStatsSnapshot } from "../src/core/types";
 
 function createSnapshot(size: number): RenderStatsSnapshot {
@@ -47,9 +47,9 @@ describe("render budget evaluation", () => {
   });
 });
 
-describe("browser render stats store", () => {
+describe("browser-page stats store", () => {
   bench("records 100 profiler events and reads a snapshot", () => {
-    resetBrowserRenderStats();
+    resetBrowserPageStatsStore();
 
     for (let index = 0; index < 100; index += 1) {
       recordProfilerRender({

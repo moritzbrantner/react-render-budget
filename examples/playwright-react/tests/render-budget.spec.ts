@@ -102,7 +102,7 @@ test("remount after reset is recorded as a mount", async ({ page }) => {
   expect(stats.components.RemountContent).toBe(1);
 });
 
-test("same component counter name aggregates across instances", async ({
+test("same component budget target name aggregates across instances", async ({
   page,
 }) => {
   await page.goto("/multiple-counters");
@@ -155,10 +155,10 @@ test("budget failures are observable through the Playwright helper", async ({
   }
 
   expect(message).toContain(
-    'Profiler "BudgetFailure" metric "updates" exceeded budget: actual 1, expected max 0.',
+    'Profiler budget target "BudgetFailure" metric "updates" exceeded budget: actual 1, expected max 0.',
   );
   expect(message).toContain(
-    'Component "BudgetCounter" metric "renders" exceeded budget: actual 1, expected max 0.',
+    'Component budget target "BudgetCounter" metric "renders" exceeded budget: actual 1, expected max 0.',
   );
 });
 

@@ -24,7 +24,7 @@ export function createEmptyRenderStatsSnapshot(): RenderStatsSnapshot {
   };
 }
 
-export function getRenderStatsStore(): RenderStatsSnapshot | undefined {
+export function getBrowserPageStatsStore(): RenderStatsSnapshot | undefined {
   if (!hasWindow()) {
     return undefined;
   }
@@ -50,7 +50,7 @@ export function readRenderStatsSnapshot(): RenderStatsSnapshot {
   };
 }
 
-export function resetBrowserRenderStats(): void {
+export function resetBrowserPageStatsStore(): void {
   if (!hasWindow()) {
     return;
   }
@@ -60,7 +60,7 @@ export function resetBrowserRenderStats(): void {
 }
 
 export function recordProfilerRender(event: ProfilerRenderEvent): void {
-  const store = getRenderStatsStore();
+  const store = getBrowserPageStatsStore();
 
   if (!store) {
     return;
@@ -96,7 +96,7 @@ export function recordProfilerRender(event: ProfilerRenderEvent): void {
 }
 
 export function incrementComponentRenderCount(name: string): void {
-  const store = getRenderStatsStore();
+  const store = getBrowserPageStatsStore();
 
   if (!store) {
     return;
