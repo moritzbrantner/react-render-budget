@@ -48,7 +48,7 @@ export function TestApp() {
 - `enabled?: boolean`
 - `metadata?: Record<string, unknown>`
 
-It records committed React Profiler events on `window.__RENDER_STATS__`.
+It records committed React Profiler events in an internal browser-page stats store. Prefer `RenderProfiler` as the default budget target for committed subtree work.
 
 ## Component Render Counter
 
@@ -60,12 +60,14 @@ import { withRenderCounter } from "react-render-budget/react";
 const CountedTimelineItem = withRenderCounter(TimelineItem, "TimelineItem");
 ```
 
-It increments `window.__COMPONENT_RENDER_COUNTS__[name]` each time the wrapped component function renders.
+It increments the named component render count in the internal browser-page stats store each time the wrapped component function renders.
 
 `RenderProfiler` and `withRenderCounter` measure different things:
 
 - `RenderProfiler` measures committed subtree renders through React's built-in Profiler.
 - `withRenderCounter` measures component function render calls, including calls that may not map one-to-one to committed subtree updates.
+
+Use component render counts for hot spots and diagnosis when subtree-level Profiler stats are too broad.
 
 ## Playwright Helpers
 
@@ -111,7 +113,9 @@ await expectRenderBudget(page, {
 });
 ```
 
-Reset stats immediately before the scenario being measured. Initial page load and mount work often has different characteristics from the interaction you want to budget.
+Reset stats immediately before the scenario being measured. `resetRenderStats(page)` clears all render stats on the page and starts a new measurement window. Initial page load and mount work often has different characteristics from the interaction you want to budget.
+
+Budget targets must be present in the measurement window. If a requested profiler id or component counter name has no recorded stats, `expectRenderBudget` fails instead of treating the target as zero renders.
 
 ## Playwright Fixture
 
@@ -160,7 +164,7 @@ The fixture works with Playwright component tests and normal browser/e2e tests, 
 
 ## Metrics
 
-Profiler stats are stored by id:
+Profiler stats are stored by budget target id:
 
 - `commits`: total committed Profiler callbacks.
 - `mounts`: commits where the Profiler phase is `mount`.
@@ -170,17 +174,23 @@ Profiler stats are stored by id:
 - `totalBaseDuration`: sum of React Profiler `baseDuration`.
 - `events`: raw Profiler events with `id`, `phase`, `actualDuration`, `baseDuration`, `startTime`, `commitTime`, and optional `metadata`.
 
-Component counts are stored by name:
+`metadata` is diagnostic event data. It is not used for aggregation, grouping, or budget evaluation.
+
+Component counts are stored by budget target name:
 
 - `components[name]`: number of times the wrapped component function rendered.
 
+If multiple profilers use the same `id`, or multiple component wrappers use the same name, their stats intentionally aggregate under that shared budget target.
+
 ## Caveats
 
-React StrictMode intentionally double-invokes some render paths in development. Keep that in mind when comparing local component render counts with production builds.
+Run authoritative render-budget tests against a production-like build and calibrate budgets in the same environment where they are enforced. Profiler budgets require React's profiling-capable production bundle; a standard production React bundle may omit Profiler callbacks. Development React behavior, including StrictMode double invocation, can distort render counts compared with production builds.
 
 Concurrent rendering can start work that is later abandoned. `RenderProfiler` records committed Profiler events. `withRenderCounter` records component function calls, including calls that may not commit.
 
 Use upper-bound budgets, not exact render counts. Render counts can change across React versions, development modes, and harmless implementation details.
+
+Duration metrics such as `totalActualDuration` and `totalBaseDuration` are more environment-sensitive than render counts. Treat duration budgets as advanced checks calibrated to a consistent browser and CI environment.
 
 ## API Reference
 
@@ -208,6 +218,7 @@ export type {
 ## Example
 
 See `examples/playwright-react` for a tiny Vite React app with a Playwright test.
+The example runs Playwright against Vite preview and aliases `react-dom/client` to `react-dom/profiling` so production-like Profiler callbacks are available.
 
 From the package root:
 

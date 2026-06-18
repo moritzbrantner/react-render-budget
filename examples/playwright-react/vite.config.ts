@@ -3,4 +3,9 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      "react-dom/client": "react-dom/profiling",
+    },
+  },
 });
