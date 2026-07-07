@@ -7,9 +7,13 @@ Repo-specific facts stay in `docs/agents/issue-tracker.md`, `docs/agents/triage-
 Summary:
 
 - GitHub Issues are the durable work queue.
-- Substantial work starts as a PRD issue labeled `prd` and `ready-for-agent`.
+- Substantial future work should default to a GitHub PRD issue instead of direct implementation.
+- PRD issues must be labeled `prd` and `ready-for-agent` only when they include acceptance criteria and out-of-scope boundaries.
 - Implementation slice issues must include a `## Parent` link to their parent PRD before they receive `ready-for-agent`.
-- The agent-loop handles slicing and routing after the PRD is ready.
+- The planning thread should stop after creating the PRD issue unless the user explicitly asks for direct implementation.
+- The planning thread should not create implementation slice issues by default; `moenarch-agent-loop` or a later `moenarch-to-issues` pass handles slicing.
+- Tiny one-shot changes may be implemented directly.
+- Explicit user direction to implement directly wins over the default.
 
 ## Model policy
 
