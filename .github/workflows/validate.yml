@@ -27,6 +27,7 @@ jobs:
       cache_bun: false
       cache_node: true
       npm_cache_dependency_path: package-lock.json
+      lint_command: npm run lint
       typecheck_command: npm run typecheck
       build_command: npm run build && npm run pages:build
       unit_test_command: npm run test:unit

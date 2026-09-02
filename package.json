@@ -33,6 +33,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "build": "tsup",
+    "lint": "npx --yes oxlint@1.80.0 src tests pages scripts --format=github",
     "typecheck": "npm run typecheck:lib && npm run pages:typecheck",
     "typecheck:lib": "tsc --noEmit",
     "test": "npm run test:unit",
