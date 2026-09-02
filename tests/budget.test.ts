@@ -72,10 +72,14 @@ describe("render budget evaluation", () => {
       ...snapshot,
       profiler: {
         TimelineEditor: {
-          ...snapshot.profiler.TimelineEditor,
+          id: "TimelineEditor",
+          commits: 3,
           mounts: 2,
+          updates: 2,
           nestedUpdates: 3,
+          totalActualDuration: 12,
           totalBaseDuration: 30,
+          events: [],
         },
       },
     };
