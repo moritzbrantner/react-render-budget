@@ -31,10 +31,15 @@ const snapshot: RenderStatsSnapshot = {
   },
 };
 
+const sampleProfiler = snapshot.profiler.Sample;
+if (!sampleProfiler) {
+  throw new Error("Sample profiler fixture must exist");
+}
+
 describe("budget threshold boundaries", () => {
   it("treats every profiler maximum as inclusive", () => {
     for (const metric of metrics) {
-      const actual = snapshot.profiler.Sample[metric];
+      const actual = sampleProfiler[metric];
       const atLimit: RenderBudget = {
         profiler: { Sample: { [metric]: actual } },
       };
