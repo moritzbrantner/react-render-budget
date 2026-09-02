@@ -67,6 +67,36 @@ describe("render budget evaluation", () => {
     );
   });
 
+  it("checks the remaining profiler metrics independently", () => {
+    const profilerSnapshot: RenderStatsSnapshot = {
+      ...snapshot,
+      profiler: {
+        TimelineEditor: {
+          ...snapshot.profiler.TimelineEditor,
+          mounts: 2,
+          nestedUpdates: 3,
+          totalBaseDuration: 30,
+        },
+      },
+    };
+
+    const violations = evaluateRenderBudget(profilerSnapshot, {
+      profiler: {
+        TimelineEditor: {
+          mounts: 1,
+          nestedUpdates: { max: 2 },
+          totalBaseDuration: 20,
+        },
+      },
+    });
+
+    expect(violations).toEqual([
+      expect.objectContaining({ metric: "mounts", actual: 2, max: 1 }),
+      expect.objectContaining({ metric: "nestedUpdates", actual: 3, max: 2 }),
+      expect.objectContaining({ metric: "totalBaseDuration", actual: 30, max: 20 }),
+    ]);
+  });
+
   it("reports missing profiler budget target ids with available profiler budget targets", () => {
     const violations = evaluateRenderBudget(snapshot, {
       profiler: {
@@ -91,5 +121,26 @@ describe("render budget evaluation", () => {
     expect(violations[0]?.message).toContain(
       'Component budget target "MissingComponent" was not found. Available component budget targets: TimelineItem, LayerRow.',
     );
+  });
+
+  it("reports none when no profiler or component targets are available", () => {
+    const violations = evaluateRenderBudget(
+      { profiler: {}, components: {} },
+      {
+        profiler: {
+          MissingProfiler: {
+            commits: 1,
+          },
+        },
+        components: {
+          MissingComponent: 1,
+        },
+      },
+    );
+
+    expect(violations.map((violation) => violation.message)).toEqual([
+      'Profiler budget target "MissingProfiler" was not found. Available profiler budget targets: none.',
+      'Component budget target "MissingComponent" was not found. Available component budget targets: none.',
+    ]);
   });
 });
