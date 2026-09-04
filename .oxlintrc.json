@@ -7,6 +7,12 @@
   "plugins": ["react", "typescript", "oxc"],
   "rules": {
     "eslint/no-shadow": "off",
+    "eslint/no-underscore-dangle": [
+      "error",
+      {
+        "allow": ["__RENDER_STATS__", "__COMPONENT_RENDER_COUNTS__"]
+      }
+    ],
     "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn",
