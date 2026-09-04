@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "profile": "repository-foundation-v1",
+  "tiers": {
+    "fast": ["lint", "typecheck", "build", "test:unit"],
+    "full": ["lint", "typecheck", "build", "test:unit", "test:e2e", "package:check", "benchmark:smoke"]
+  },
+  "requiredCapabilities": ["lint", "typecheck", "build", "test:unit"],
+  "optionalCapabilities": ["test:e2e", "package:check", "benchmark:smoke"],
+  "capabilityCommands": {
+    "react-render-budget": {
+      "package:check": ["npm", "run", "pack:check"],
+      "benchmark:smoke": ["npm", "run", "bench"]
+    }
+  }
+}
