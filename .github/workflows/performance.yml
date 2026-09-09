@@ -22,7 +22,7 @@ jobs:
       packages: read
     uses: moritzbrantner/reusable-workflows/.github/workflows/performance-validation.yml@workflow-standard-v1.3
     with:
-      node_version: "20"
+      node_version: "24.20.0"
       bun_version: ""
       install_command: npm ci
       cache_bun: false
