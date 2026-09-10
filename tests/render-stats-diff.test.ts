@@ -45,6 +45,7 @@ describe("render stats diff", () => {
         profiler: ["TimelineEditor"],
         components: ["TimelineItem", "StableRow"],
       },
+      documentId: "document-a",
     };
     const after: RenderStatsSnapshot = {
       profiler: {
@@ -67,6 +68,7 @@ describe("render stats diff", () => {
         profiler: ["TimelineEditor"],
         components: ["TimelineItem", "StableRow"],
       },
+      documentId: "document-a",
     };
     const beforeCopy = structuredClone(before);
     const afterCopy = structuredClone(after);
@@ -113,6 +115,7 @@ describe("render stats diff", () => {
       components: {
         TimelineItem: 1,
       },
+      documentId: "document-a",
     };
 
     const difference = diffRenderStats(snapshot, snapshot);
@@ -137,6 +140,25 @@ describe("render stats diff", () => {
         },
       }),
     ).not.toThrow();
+  });
+
+  it("rejects snapshots from different browser documents", () => {
+    expect(() =>
+      diffRenderStats(
+        {
+          profiler: {},
+          components: { TimelineItem: 1 },
+          documentId: "document-a",
+        },
+        {
+          profiler: {},
+          components: { TimelineItem: 1 },
+          documentId: "document-b",
+        },
+      ),
+    ).toThrow(
+      "Cannot diff render stats: the browser document changed during the measurement window.",
+    );
   });
 
   it("rejects snapshots that cross a reset or otherwise move backwards", () => {

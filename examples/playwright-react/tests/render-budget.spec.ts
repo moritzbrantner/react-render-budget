@@ -29,6 +29,16 @@ test("counter interaction stays within render budget", async ({ page }) => {
   });
 });
 
+test("scenario measurement rejects document replacement", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(
+    measureRenderScenario(page, () => page.goto("/reset-isolation")),
+  ).rejects.toThrow(
+    "Cannot diff render stats: the browser document changed during the measurement window.",
+  );
+});
+
 test("reset clears stats without resetting app state", async ({ page }) => {
   await page.goto("/reset-isolation");
 

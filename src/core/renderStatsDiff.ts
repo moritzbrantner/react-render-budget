@@ -35,6 +35,21 @@ function createEmptyProfilerStats(id: string): ProfilerRenderStats {
   };
 }
 
+function assertSameDocument(
+  before: RenderStatsSnapshot,
+  after: RenderStatsSnapshot,
+): void {
+  if (
+    before.documentId !== undefined &&
+    after.documentId !== undefined &&
+    before.documentId !== after.documentId
+  ) {
+    throw new Error(
+      "Cannot diff render stats: the browser document changed during the measurement window.",
+    );
+  }
+}
+
 function subtractMonotonic(
   target: string,
   metric: string,
@@ -134,6 +149,8 @@ export function diffRenderStats(
   before: RenderStatsSnapshot,
   after: RenderStatsSnapshot,
 ): RenderStatsSnapshot {
+  assertSameDocument(before, after);
+
   const knownTargets: KnownRenderTargets = {
     profiler: uniqueIds(knownProfilerIds(before), knownProfilerIds(after)),
     components: uniqueIds(

@@ -26,6 +26,7 @@ beforeEach(() => {
   delete window.__RENDER_STATS__;
   delete window.__COMPONENT_RENDER_COUNTS__;
   delete window.reactRenderBudgetKnownTargets;
+  delete window.reactRenderBudgetDocumentId;
 });
 
 describe("Playwright helpers", () => {
@@ -124,6 +125,18 @@ describe("Playwright helpers", () => {
       "TimelineItem",
       "StableRow",
     ]);
+  });
+
+  it("rejects a scenario that replaces the browser document", async () => {
+    const page = createPageStub();
+
+    await expect(
+      measureRenderScenario(page, async () => {
+        window.reactRenderBudgetDocumentId = crypto.randomUUID();
+      }),
+    ).rejects.toThrow(
+      "Cannot diff render stats: the browser document changed during the measurement window.",
+    );
   });
 
   it("asserts a budget directly around an action without resetting", async () => {

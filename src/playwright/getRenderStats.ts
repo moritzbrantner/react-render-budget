@@ -16,6 +16,7 @@ export async function getRenderStatsWithKnownTargets(
     const profiler = window.__RENDER_STATS__ ?? {};
     const components = window.__COMPONENT_RENDER_COUNTS__ ?? {};
     const knownTargets = window.reactRenderBudgetKnownTargets;
+    window.reactRenderBudgetDocumentId ??= crypto.randomUUID();
 
     return {
       profiler,
@@ -34,6 +35,7 @@ export async function getRenderStatsWithKnownTargets(
           ]),
         ],
       },
+      documentId: window.reactRenderBudgetDocumentId,
     };
   });
 }

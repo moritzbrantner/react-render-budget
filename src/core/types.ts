@@ -34,6 +34,7 @@ export interface RenderStatsSnapshot {
   profiler: Record<string, ProfilerRenderStats>;
   components: ComponentRenderCounts;
   knownTargets?: KnownRenderTargets;
+  documentId?: string;
 }
 
 export type ProfilerBudgetMetric =
@@ -86,5 +87,6 @@ declare global {
       profiler: Record<string, true>;
       components: Record<string, true>;
     };
+    reactRenderBudgetDocumentId?: string;
   }
 }

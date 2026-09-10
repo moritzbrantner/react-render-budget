@@ -169,7 +169,9 @@ await expectRenderBudgetAfter(
 
 `measureRenderScenario` captures a snapshot, awaits the supplied action, captures another snapshot, and returns `diffRenderStats(before, after)`. The action should include any application-specific waiting needed to define the end of the scenario. The helper does not add arbitrary sleeps or hidden stabilization rules.
 
-`diffRenderStats` is also exported from the package root for pure snapshot comparison. It rejects counters that move backwards, so accidentally diffing across a reset fails instead of producing negative render work.
+Each enriched measurement snapshot also carries an internal per-document identity. If the supplied action performs a full-page navigation or otherwise replaces the browser document, the comparison fails closed instead of subtracting counters from unrelated document epochs.
+
+`diffRenderStats` is also exported from the package root for pure snapshot comparison. It rejects mismatched document identities and counters that move backwards, so cross-document and reset-crossing comparisons fail instead of producing false zero or negative render work.
 
 ## Playwright Fixture
 
