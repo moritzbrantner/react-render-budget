@@ -15,6 +15,7 @@ export async function getRenderStatsWithKnownTargets(
   return page.evaluate(() => {
     const profiler = window.__RENDER_STATS__ ?? {};
     const components = window.__COMPONENT_RENDER_COUNTS__ ?? {};
+    const knownTargets = window.reactRenderBudgetKnownTargets;
 
     return {
       profiler,
@@ -23,13 +24,13 @@ export async function getRenderStatsWithKnownTargets(
         profiler: [
           ...new Set([
             ...Object.keys(profiler),
-            ...Object.keys(window.__RENDER_PROFILER_TARGETS__ ?? {}),
+            ...Object.keys(knownTargets?.profiler ?? {}),
           ]),
         ],
         components: [
           ...new Set([
             ...Object.keys(components),
-            ...Object.keys(window.__COMPONENT_RENDER_TARGETS__ ?? {}),
+            ...Object.keys(knownTargets?.components ?? {}),
           ]),
         ],
       },

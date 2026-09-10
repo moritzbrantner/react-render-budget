@@ -17,33 +17,46 @@ function createEmptyKnownRenderTargets(): KnownRenderTargets {
   };
 }
 
-function readKnownRenderTargets(): KnownRenderTargets {
+function getKnownRenderTargetRegistry() {
   if (!hasWindow()) {
+    return undefined;
+  }
+
+  window.reactRenderBudgetKnownTargets ??= {
+    profiler: {},
+    components: {},
+  };
+
+  return window.reactRenderBudgetKnownTargets;
+}
+
+function readKnownRenderTargets(): KnownRenderTargets {
+  const registry = getKnownRenderTargetRegistry();
+
+  if (!registry) {
     return createEmptyKnownRenderTargets();
   }
 
   return {
-    profiler: Object.keys(window.__RENDER_PROFILER_TARGETS__ ?? {}),
-    components: Object.keys(window.__COMPONENT_RENDER_TARGETS__ ?? {}),
+    profiler: Object.keys(registry.profiler),
+    components: Object.keys(registry.components),
   };
 }
 
 function registerProfilerTarget(id: string): void {
-  if (!hasWindow()) {
-    return;
-  }
+  const registry = getKnownRenderTargetRegistry();
 
-  window.__RENDER_PROFILER_TARGETS__ ??= {};
-  window.__RENDER_PROFILER_TARGETS__[id] = true;
+  if (registry) {
+    registry.profiler[id] = true;
+  }
 }
 
 function registerComponentTarget(name: string): void {
-  if (!hasWindow()) {
-    return;
-  }
+  const registry = getKnownRenderTargetRegistry();
 
-  window.__COMPONENT_RENDER_TARGETS__ ??= {};
-  window.__COMPONENT_RENDER_TARGETS__[name] = true;
+  if (registry) {
+    registry.components[name] = true;
+  }
 }
 
 export function createEmptyRenderStats(): Record<string, ProfilerRenderStats> {
@@ -69,8 +82,7 @@ export function getBrowserPageStatsStore(): RenderStatsSnapshot | undefined {
 
   window.__RENDER_STATS__ ??= createEmptyRenderStats();
   window.__COMPONENT_RENDER_COUNTS__ ??= createEmptyComponentRenderCounts();
-  window.__RENDER_PROFILER_TARGETS__ ??= {};
-  window.__COMPONENT_RENDER_TARGETS__ ??= {};
+  getKnownRenderTargetRegistry();
 
   return {
     profiler: window.__RENDER_STATS__,
@@ -108,8 +120,7 @@ export function resetBrowserPageStatsStore(): void {
 
   window.__RENDER_STATS__ = createEmptyRenderStats();
   window.__COMPONENT_RENDER_COUNTS__ = createEmptyComponentRenderCounts();
-  window.__RENDER_PROFILER_TARGETS__ ??= {};
-  window.__COMPONENT_RENDER_TARGETS__ ??= {};
+  getKnownRenderTargetRegistry();
 }
 
 export function recordProfilerRender(event: ProfilerRenderEvent): void {

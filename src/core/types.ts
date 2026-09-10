@@ -82,7 +82,9 @@ declare global {
   interface Window {
     __RENDER_STATS__?: Record<string, ProfilerRenderStats>;
     __COMPONENT_RENDER_COUNTS__?: ComponentRenderCounts;
-    __RENDER_PROFILER_TARGETS__?: Record<string, true>;
-    __COMPONENT_RENDER_TARGETS__?: Record<string, true>;
+    reactRenderBudgetKnownTargets?: {
+      profiler: Record<string, true>;
+      components: Record<string, true>;
+    };
   }
 }

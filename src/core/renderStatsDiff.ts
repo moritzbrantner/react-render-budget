@@ -104,7 +104,7 @@ function diffProfilerStats(
 
   const events = afterStats.events
     .slice(beforeStats.events.length)
-    .map((event) => ({ ...event }));
+    .map((event) => Object.assign({}, event));
 
   if (
     commits === 0 &&

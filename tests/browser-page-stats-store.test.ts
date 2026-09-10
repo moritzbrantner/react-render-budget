@@ -11,8 +11,7 @@ import {
 beforeEach(() => {
   delete window.__RENDER_STATS__;
   delete window.__COMPONENT_RENDER_COUNTS__;
-  delete window.__RENDER_PROFILER_TARGETS__;
-  delete window.__COMPONENT_RENDER_TARGETS__;
+  delete window.reactRenderBudgetKnownTargets;
 });
 
 describe("browser-page stats store", () => {
@@ -31,8 +30,10 @@ describe("browser-page stats store", () => {
     });
     expect(window.__RENDER_STATS__).toEqual({});
     expect(window.__COMPONENT_RENDER_COUNTS__).toEqual({});
-    expect(window.__RENDER_PROFILER_TARGETS__).toEqual({});
-    expect(window.__COMPONENT_RENDER_TARGETS__).toEqual({});
+    expect(window.reactRenderBudgetKnownTargets).toEqual({
+      profiler: {},
+      components: {},
+    });
   });
 
   it("records profiler events, component counts, and known targets", () => {

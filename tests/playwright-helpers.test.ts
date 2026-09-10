@@ -25,8 +25,7 @@ function createPageStub(): Page {
 beforeEach(() => {
   delete window.__RENDER_STATS__;
   delete window.__COMPONENT_RENDER_COUNTS__;
-  delete window.__RENDER_PROFILER_TARGETS__;
-  delete window.__COMPONENT_RENDER_TARGETS__;
+  delete window.reactRenderBudgetKnownTargets;
 });
 
 describe("Playwright helpers", () => {
@@ -46,8 +45,10 @@ describe("Playwright helpers", () => {
     window.__COMPONENT_RENDER_COUNTS__ = {
       TimelineItem: 1,
     };
-    window.__RENDER_PROFILER_TARGETS__ = { TimelineEditor: true };
-    window.__COMPONENT_RENDER_TARGETS__ = { TimelineItem: true };
+    window.reactRenderBudgetKnownTargets = {
+      profiler: { TimelineEditor: true },
+      components: { TimelineItem: true },
+    };
 
     const page = createPageStub();
 
@@ -60,8 +61,10 @@ describe("Playwright helpers", () => {
   });
 
   it("allows zero budgets for known targets after a reset", async () => {
-    window.__RENDER_PROFILER_TARGETS__ = { TimelineEditor: true };
-    window.__COMPONENT_RENDER_TARGETS__ = { TimelineItem: true };
+    window.reactRenderBudgetKnownTargets = {
+      profiler: { TimelineEditor: true },
+      components: { TimelineItem: true },
+    };
 
     const page = createPageStub();
 
@@ -103,9 +106,12 @@ describe("Playwright helpers", () => {
 
   it("measures an action from immutable before and after snapshots", async () => {
     window.__COMPONENT_RENDER_COUNTS__ = { TimelineItem: 2 };
-    window.__COMPONENT_RENDER_TARGETS__ = {
-      TimelineItem: true,
-      StableRow: true,
+    window.reactRenderBudgetKnownTargets = {
+      profiler: {},
+      components: {
+        TimelineItem: true,
+        StableRow: true,
+      },
     };
 
     const page = createPageStub();
@@ -122,9 +128,12 @@ describe("Playwright helpers", () => {
 
   it("asserts a budget directly around an action without resetting", async () => {
     window.__COMPONENT_RENDER_COUNTS__ = { TimelineItem: 2 };
-    window.__COMPONENT_RENDER_TARGETS__ = {
-      TimelineItem: true,
-      StableRow: true,
+    window.reactRenderBudgetKnownTargets = {
+      profiler: {},
+      components: {
+        TimelineItem: true,
+        StableRow: true,
+      },
     };
 
     const page = createPageStub();
