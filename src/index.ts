@@ -1,5 +1,7 @@
+export { diffRenderStats } from "./core/renderStatsDiff";
 export type {
   ComponentRenderCounts,
+  KnownRenderTargets,
   NumericRenderBudget,
   ProfilerBudgetMetric,
   ProfilerRenderBudget,
@@ -10,5 +12,6 @@ export type {
   RenderBudgetFixture,
   RenderBudgetViolation,
   RenderMetadata,
+  RenderScenarioAction,
   RenderStatsSnapshot,
 } from "./core/types";

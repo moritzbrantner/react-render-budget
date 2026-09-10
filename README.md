@@ -6,7 +6,7 @@ Measure React render counts and render budgets in Playwright tests.
 
 - `RenderProfiler` records React Profiler commits for a subtree.
 - `withRenderCounter` records component function render calls.
-- Playwright helpers reset, read, and assert render budgets from the browser page.
+- Playwright helpers reset, read, diff, measure, and assert render budgets from the browser page.
 
 There is no global React patching, monkey-patching, automatic instrumentation, framework coupling, or hard-coded component naming. Apps only record stats where they explicitly render or wrap these helpers.
 
@@ -52,9 +52,11 @@ It records committed React Profiler events in an internal browser-page stats sto
 
 ## Terminology
 
-A render budget is an upper bound on allowed render work during a measurement window. A measurement window starts after `resetRenderStats(page)` and covers the scenario you measure.
+A render budget is an upper bound on allowed render work during a measurement window. A measurement window can start after `resetRenderStats(page)`, or it can be defined immutably by comparing snapshots before and after one explicit action.
 
 A budget target is the string key used for profiler stats or component render counts. Profiler budget targets come from `RenderProfiler` ids, and component budget targets come from `withRenderCounter` names.
+
+Known targets are registered independently from their activity counts. This lets a budget distinguish a real zero-render result from a target name that was never instrumented.
 
 ## Component Render Counter
 
@@ -119,9 +121,55 @@ await expectRenderBudget(page, {
 });
 ```
 
-Reset stats immediately before the scenario being measured. `resetRenderStats(page)` clears all render stats on the page and starts a new measurement window. Initial page load and mount work often has different characteristics from the interaction you want to budget.
+`resetRenderStats(page)` clears measured activity without forgetting which profiler and component targets have already been observed on the page. A known target that records no work after reset can therefore be asserted at zero:
 
-Budget targets must be present in the measurement window. If a requested profiler budget target id or component budget target name has no recorded stats, `expectRenderBudget` fails instead of treating the target as zero renders.
+```ts
+await resetRenderStats(page);
+await page.getByText("Unrelated control").click();
+
+await expectRenderBudget(page, {
+  components: {
+    TimelineItem: 0,
+  },
+});
+```
+
+An unknown target still fails closed instead of being treated as zero.
+
+## Immutable Scenario Measurement
+
+For interaction budgets, prefer measuring one explicit action from immutable before and after snapshots. This avoids destructive resets and keeps startup work separate from the action being tested:
+
+```ts
+import {
+  expectRenderBudgetAfter,
+  measureRenderScenario,
+} from "react-render-budget/playwright";
+
+const measurement = await measureRenderScenario(page, () =>
+  page.getByText("Clip 1").click(),
+);
+
+expect(measurement.components.TimelineItem).toBe(1);
+
+await expectRenderBudgetAfter(
+  page,
+  () => page.getByText("Clip 2").click(),
+  {
+    profiler: {
+      TimelineEditor: { updates: 1 },
+    },
+    components: {
+      TimelineItem: 1,
+      StableToolbar: 0,
+    },
+  },
+);
+```
+
+`measureRenderScenario` captures a snapshot, awaits the supplied action, captures another snapshot, and returns `diffRenderStats(before, after)`. The action should include any application-specific waiting needed to define the end of the scenario. The helper does not add arbitrary sleeps or hidden stabilization rules.
+
+`diffRenderStats` is also exported from the package root for pure snapshot comparison. It rejects counters that move backwards, so accidentally diffing across a reset fails instead of producing negative render work.
 
 ## Playwright Fixture
 
@@ -153,20 +201,20 @@ test("selecting a clip stays within render budget", async ({
     </RenderProfiler>,
   );
 
-  await renderStats.reset();
-  await page.getByText("Clip 1").click();
-
-  await renderStats.expectBudget({
-    profiler: {
-      TimelineEditor: {
-        updates: { max: 2 },
+  await renderStats.expectAfter(
+    () => page.getByText("Clip 1").click(),
+    {
+      profiler: {
+        TimelineEditor: {
+          updates: { max: 2 },
+        },
       },
     },
-  });
+  );
 });
 ```
 
-The fixture works with Playwright component tests and normal browser/e2e tests, as long as the app imports and renders the React instrumentation.
+The fixture keeps the existing `reset`, `get`, and `expectBudget` helpers and adds `measure(action)` plus `expectAfter(action, budget)` for immutable interaction windows. It works with Playwright component tests and normal browser/e2e tests, as long as the app imports and renders the React instrumentation.
 
 ## Metrics
 
@@ -209,14 +257,19 @@ export { withRenderCounter } from "react-render-budget/react";
 export { resetRenderStats } from "react-render-budget/playwright";
 export { getRenderStats } from "react-render-budget/playwright";
 export { expectRenderBudget } from "react-render-budget/playwright";
+export { measureRenderScenario } from "react-render-budget/playwright";
+export { expectRenderBudgetAfter } from "react-render-budget/playwright";
 export { createRenderBudgetFixture } from "react-render-budget/playwright";
 
 // react-render-budget
+export { diffRenderStats } from "react-render-budget";
 export type {
   RenderBudget,
   RenderStatsSnapshot,
   ProfilerRenderStats,
   ComponentRenderCounts,
+  KnownRenderTargets,
+  RenderScenarioAction,
   RenderBudgetFixture,
 } from "react-render-budget";
 ```
