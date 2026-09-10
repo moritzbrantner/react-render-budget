@@ -14,20 +14,46 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build-pages:
+    permissions:
+      actions: read
+      contents: read
+      packages: read
+    uses: moritzbrantner/reusable-workflows/.github/workflows/build-artifact.yml@2ec97db0aa1a3bcd2f664af0b0d69bef8bab578f
+    with:
+      source_sha: ${{ github.sha }}
+      artifact_key: react-render-budget-pages-v1
+      node_version: "24.20.0"
+      bun_version: ""
+      cache_node: true
+      npm_cache_dependency_path: package-lock.json
+      setup_command: npm ci
+      build_command: npm run pages:build
+      artifact_paths: pages-dist
+      reuse_across_runs: true
+      artifact_retention_days: 7
+
   deploy-pages:
+    needs: build-pages
     permissions:
       actions: read
       contents: read
       pages: write
       id-token: write
       packages: read
-    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@workflow-standard-v1.3
+    uses: moritzbrantner/reusable-workflows/.github/workflows/deploy-pages.yml@2ec97db0aa1a3bcd2f664af0b0d69bef8bab578f
     with:
-      node_version: "24.20.0"
+      node_version: ""
       bun_version: ""
-      install_command: npm ci
-      cache_bun: false
-      cache_node: true
-      npm_cache_dependency_path: package-lock.json
-      build_command: npm run pages:build
+      install_command: ""
+      build_command: ""
       artifact_path: pages-dist
+      prebuilt_artifact_run_id: ${{ needs.build-pages.outputs.producer_run_id }}
+      prebuilt_artifact_receipt_name: ${{ needs.build-pages.outputs.receipt_artifact_name }}
+      prebuilt_artifact_name: ${{ needs.build-pages.outputs.artifact_name }}
+      prebuilt_artifact_digest: ${{ needs.build-pages.outputs.artifact_digest }}
+      prebuilt_source_sha: ${{ needs.build-pages.outputs.source_sha }}
+      prebuilt_artifact_key: ${{ needs.build-pages.outputs.artifact_key }}
+      prebuilt_identity_digest: ${{ needs.build-pages.outputs.identity_digest }}
+      cache_bun: false
+      cache_node: false
