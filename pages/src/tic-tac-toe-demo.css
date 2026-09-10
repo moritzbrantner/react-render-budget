@@ -1,0 +1,66 @@
+.tic-tac-toe-live {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tic-tac-toe-live__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tic-tac-toe-live__toolbar > span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 820;
+}
+
+.tic-tac-toe-live__reset {
+  min-height: 36px;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.82rem;
+}
+
+.tic-tac-toe-status {
+  min-height: 1.6rem;
+  margin: 0;
+  color: var(--ink);
+  font-weight: 820;
+}
+
+.tic-tac-toe-board button {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-strong);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 2rem;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.tic-tac-toe-board button:hover {
+  border-color: rgb(31 122 77 / 45%);
+}
+
+.tic-tac-toe-board button:focus-visible {
+  outline: 3px solid rgb(37 99 235 / 35%);
+  outline-offset: 2px;
+}
+
+.tic-tac-toe-board button[data-filled="true"] {
+  background: #e7f5ec;
+  color: var(--green);
+}
+
+@media (max-width: 620px) {
+  .tic-tac-toe-live__toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
