@@ -12,5 +12,9 @@
       "package:check": ["npm", "run", "pack:check"],
       "benchmark:smoke": ["npm", "run", "bench"]
     }
+  },
+  "merge": {
+    "authority": "hosted",
+    "requiredChecks": ["fast-validation / Fast Validation"]
   }
 }
