@@ -41,6 +41,31 @@ describe("render budget evaluation", () => {
     ).not.toThrow();
   });
 
+  it("treats known targets without recorded activity as zero", () => {
+    const idleSnapshot: RenderStatsSnapshot = {
+      profiler: {},
+      components: {},
+      knownTargets: {
+        profiler: ["TimelineEditor"],
+        components: ["TimelineItem"],
+      },
+    };
+
+    expect(() =>
+      assertRenderBudget(idleSnapshot, {
+        profiler: {
+          TimelineEditor: {
+            commits: 0,
+            updates: 0,
+          },
+        },
+        components: {
+          TimelineItem: 0,
+        },
+      }),
+    ).not.toThrow();
+  });
+
   it("reports budget failures with actual value, max, and metric", () => {
     let message = "";
 

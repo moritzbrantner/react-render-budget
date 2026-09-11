@@ -1,31 +1,42 @@
 import { expect, test } from "@playwright/test";
 import {
   expectRenderBudget,
+  expectRenderBudgetAfter,
   getRenderStats,
+  measureRenderScenario,
   resetRenderStats,
 } from "react-render-budget/playwright";
 
 test("counter interaction stays within render budget", async ({ page }) => {
   await page.goto("/");
 
-  await resetRenderStats(page);
-  await page.getByRole("button", { name: "Count 0" }).click();
-
-  const stats = await getRenderStats(page);
+  const stats = await measureRenderScenario(page, () =>
+    page.getByRole("button", { name: "Count 0" }).click(),
+  );
   expect(stats.components.ExampleCounter).toBe(1);
   expect(stats.profiler.ExampleApp?.updates).toBe(1);
 
   await expectRenderBudget(page, {
     profiler: {
       ExampleApp: {
-        commits: { max: 1 },
+        commits: { max: 2 },
         updates: { max: 1 },
       },
     },
     components: {
-      ExampleCounter: 1,
+      ExampleCounter: 2,
     },
   });
+});
+
+test("scenario measurement rejects document replacement", async ({ page }) => {
+  await page.goto("/");
+
+  await expect(
+    measureRenderScenario(page, () => page.goto("/reset-isolation")),
+  ).rejects.toThrow(
+    "Cannot diff render stats: the browser document changed during the measurement window.",
+  );
 });
 
 test("reset clears stats without resetting app state", async ({ page }) => {
@@ -40,6 +51,18 @@ test("reset clears stats without resetting app state", async ({ page }) => {
   expect(await getRenderStats(page)).toEqual({
     profiler: {},
     components: {},
+  });
+
+  await expectRenderBudget(page, {
+    profiler: {
+      ResetIsolation: {
+        commits: 0,
+        updates: 0,
+      },
+    },
+    components: {
+      ResetCounter: 0,
+    },
   });
 
   await page.getByRole("button", { name: "Reset count 1" }).click();
@@ -178,10 +201,33 @@ test("tic tac toe startup and first move render only the expected components", a
     expect(startupStats.components[`TicTacToeCell${index}`]).toBe(1);
   }
 
-  await resetRenderStats(page);
-  await page.getByRole("button", { name: "Cell 1" }).click();
+  const moveStats = await expectRenderBudgetAfter(
+    page,
+    () => page.getByRole("button", { name: "Cell 1" }).click(),
+    {
+      profiler: {
+        TicTacToeExample: {
+          commits: 1,
+          updates: 1,
+        },
+      },
+      components: {
+        TicTacToeGame: 1,
+        TicTacToeStatus: 1,
+        TicTacToeBoard: 1,
+        TicTacToeCell1: 1,
+        TicTacToeCell2: 0,
+        TicTacToeCell3: 0,
+        TicTacToeCell4: 0,
+        TicTacToeCell5: 0,
+        TicTacToeCell6: 0,
+        TicTacToeCell7: 0,
+        TicTacToeCell8: 0,
+        TicTacToeCell9: 0,
+      },
+    },
+  );
 
-  const moveStats = await getRenderStats(page);
   expect(moveStats.profiler.TicTacToeExample?.updates).toBe(1);
   expect(moveStats.components.TicTacToeGame).toBe(1);
   expect(moveStats.components.TicTacToeStatus).toBe(1);
@@ -191,18 +237,4 @@ test("tic tac toe startup and first move render only the expected components", a
   for (let index = 2; index <= 9; index += 1) {
     expect(moveStats.components[`TicTacToeCell${index}`]).toBeUndefined();
   }
-
-  await expectRenderBudget(page, {
-    profiler: {
-      TicTacToeExample: {
-        updates: { max: 1 },
-      },
-    },
-    components: {
-      TicTacToeGame: 1,
-      TicTacToeStatus: 1,
-      TicTacToeBoard: 1,
-      TicTacToeCell1: 1,
-    },
-  });
 });

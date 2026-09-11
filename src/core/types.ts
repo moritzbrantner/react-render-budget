@@ -25,9 +25,16 @@ export interface ProfilerRenderStats {
 
 export type ComponentRenderCounts = Record<string, number>;
 
+export interface KnownRenderTargets {
+  profiler: string[];
+  components: string[];
+}
+
 export interface RenderStatsSnapshot {
   profiler: Record<string, ProfilerRenderStats>;
   components: ComponentRenderCounts;
+  knownTargets?: KnownRenderTargets;
+  documentId?: string;
 }
 
 export type ProfilerBudgetMetric =
@@ -59,15 +66,27 @@ export interface RenderBudgetViolation {
   message: string;
 }
 
+export type RenderScenarioAction = () => unknown | Promise<unknown>;
+
 export interface RenderBudgetFixture {
   reset: () => Promise<void>;
   get: () => Promise<RenderStatsSnapshot>;
   expectBudget: (budget: RenderBudget) => Promise<RenderStatsSnapshot>;
+  measure: (action: RenderScenarioAction) => Promise<RenderStatsSnapshot>;
+  expectAfter: (
+    action: RenderScenarioAction,
+    budget: RenderBudget,
+  ) => Promise<RenderStatsSnapshot>;
 }
 
 declare global {
   interface Window {
     __RENDER_STATS__?: Record<string, ProfilerRenderStats>;
     __COMPONENT_RENDER_COUNTS__?: ComponentRenderCounts;
+    reactRenderBudgetKnownTargets?: {
+      profiler: Record<string, true>;
+      components: Record<string, true>;
+    };
+    reactRenderBudgetDocumentId?: string;
   }
 }

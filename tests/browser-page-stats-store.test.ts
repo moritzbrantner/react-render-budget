@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   getBrowserPageStatsStore,
@@ -8,8 +8,14 @@ import {
   resetBrowserPageStatsStore,
 } from "../src/core/browserPageStatsStore";
 
+beforeEach(() => {
+  delete window.__RENDER_STATS__;
+  delete window.__COMPONENT_RENDER_COUNTS__;
+  delete window.reactRenderBudgetKnownTargets;
+});
+
 describe("browser-page stats store", () => {
-  it("initializes render stats lazily", () => {
+  it("initializes render stats and target registries lazily", () => {
     resetBrowserPageStatsStore();
 
     const store = getBrowserPageStatsStore();
@@ -17,12 +23,20 @@ describe("browser-page stats store", () => {
     expect(store).toEqual({
       profiler: {},
       components: {},
+      knownTargets: {
+        profiler: [],
+        components: [],
+      },
     });
     expect(window.__RENDER_STATS__).toEqual({});
     expect(window.__COMPONENT_RENDER_COUNTS__).toEqual({});
+    expect(window.reactRenderBudgetKnownTargets).toEqual({
+      profiler: {},
+      components: {},
+    });
   });
 
-  it("records profiler events and component render counts", () => {
+  it("records profiler events, component counts, and known targets", () => {
     resetBrowserPageStatsStore();
 
     recordProfilerRender({
@@ -57,10 +71,22 @@ describe("browser-page stats store", () => {
     });
     expect(snapshot.profiler.TimelineEditor?.events).toHaveLength(2);
     expect(snapshot.components.TimelineItem).toBe(2);
+    expect(snapshot.knownTargets).toEqual({
+      profiler: ["TimelineEditor"],
+      components: ["TimelineItem"],
+    });
   });
 
-  it("resets render stats", () => {
+  it("resets activity while preserving known targets", () => {
     resetBrowserPageStatsStore();
+    recordProfilerRender({
+      id: "TimelineEditor",
+      phase: "mount",
+      actualDuration: 2,
+      baseDuration: 4,
+      startTime: 10,
+      commitTime: 12,
+    });
     incrementComponentRenderCount("TimelineItem");
 
     resetBrowserPageStatsStore();
@@ -68,6 +94,10 @@ describe("browser-page stats store", () => {
     expect(readRenderStatsSnapshot()).toEqual({
       profiler: {},
       components: {},
+      knownTargets: {
+        profiler: ["TimelineEditor"],
+        components: ["TimelineItem"],
+      },
     });
   });
 });

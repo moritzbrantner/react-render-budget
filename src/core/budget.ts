@@ -19,6 +19,10 @@ function normalizeMax(budget: NumericRenderBudget): number {
   return typeof budget === "number" ? budget : budget.max;
 }
 
+function uniqueIds(observedIds: string[], knownIds: string[]): string[] {
+  return [...new Set([...observedIds, ...knownIds])];
+}
+
 function formatAvailable(ids: string[]): string {
   return ids.length > 0 ? ids.join(", ") : "none";
 }
@@ -28,12 +32,18 @@ export function evaluateRenderBudget(
   budget: RenderBudget,
 ): RenderBudgetViolation[] {
   const violations: RenderBudgetViolation[] = [];
+  const knownProfilerTargets = snapshot.knownTargets?.profiler ?? [];
+  const knownComponentTargets = snapshot.knownTargets?.components ?? [];
 
   for (const [id, profilerBudget] of Object.entries(budget.profiler ?? {})) {
     const stats = snapshot.profiler[id];
-    const availableIds = Object.keys(snapshot.profiler);
+    const availableIds = uniqueIds(
+      Object.keys(snapshot.profiler),
+      knownProfilerTargets,
+    );
+    const isKnownTarget = stats !== undefined || knownProfilerTargets.includes(id);
 
-    if (!stats) {
+    if (!isKnownTarget) {
       violations.push({
         target: "profiler",
         id,
@@ -54,7 +64,7 @@ export function evaluateRenderBudget(
       }
 
       const max = normalizeMax(metricBudget);
-      const actual = stats[metric];
+      const actual = stats?.[metric] ?? 0;
 
       if (actual > max) {
         violations.push({
@@ -71,10 +81,15 @@ export function evaluateRenderBudget(
   }
 
   for (const [id, componentBudget] of Object.entries(budget.components ?? {})) {
-    const availableIds = Object.keys(snapshot.components);
-    const actual = snapshot.components[id];
+    const availableIds = uniqueIds(
+      Object.keys(snapshot.components),
+      knownComponentTargets,
+    );
+    const observed = snapshot.components[id];
+    const isKnownTarget =
+      observed !== undefined || knownComponentTargets.includes(id);
 
-    if (actual === undefined) {
+    if (!isKnownTarget) {
       violations.push({
         target: "component",
         id,
@@ -87,6 +102,7 @@ export function evaluateRenderBudget(
       continue;
     }
 
+    const actual = observed ?? 0;
     const max = normalizeMax(componentBudget);
 
     if (actual > max) {
