@@ -29,14 +29,36 @@ jobs:
       npm_cache_dependency_path: package-lock.json
       lint_command: npm run lint
       typecheck_command: npm run typecheck
-      build_command: npm run build && npm run pages:build
+      build_command: npm run pages:build
       unit_test_command: npm run test:unit
 
-  package-validation:
+  build-package:
+    name: Build or reuse package
+    needs: fast-validation
     permissions:
+      actions: read
+      contents: read
+    uses: moritzbrantner/reusable-workflows/.github/workflows/build-artifact.yml@544af51c921b09b4452b7346347ec9effa58f179
+    with:
+      source_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+      artifact_key: react-render-budget-package-v1
+      node_version: "24.20.0"
+      bun_version: ""
+      cache_node: true
+      npm_cache_dependency_path: package-lock.json
+      setup_command: npm ci
+      build_command: npm run build
+      artifact_paths: dist
+      reuse_across_runs: true
+      artifact_retention_days: 7
+
+  package-validation:
+    needs: build-package
+    permissions:
+      actions: read
       contents: read
       packages: read
-    uses: moritzbrantner/reusable-workflows/.github/workflows/integration-validation.yml@workflow-standard-v1.3
+    uses: moritzbrantner/reusable-workflows/.github/workflows/integration-validation.yml@544af51c921b09b4452b7346347ec9effa58f179
     with:
       node_version: "24.20.0"
       bun_version: ""
@@ -44,19 +66,37 @@ jobs:
       cache_bun: false
       cache_node: true
       npm_cache_dependency_path: package-lock.json
-      package_check_command: npm run pack:check
+      prebuilt_artifact_run_id: ${{ needs.build-package.outputs.producer_run_id }}
+      prebuilt_artifact_receipt_name: ${{ needs.build-package.outputs.receipt_artifact_name }}
+      prebuilt_artifact_name: ${{ needs.build-package.outputs.artifact_name }}
+      prebuilt_artifact_digest: ${{ needs.build-package.outputs.artifact_digest }}
+      prebuilt_source_sha: ${{ needs.build-package.outputs.source_sha }}
+      prebuilt_artifact_key: ${{ needs.build-package.outputs.artifact_key }}
+      prebuilt_identity_digest: ${{ needs.build-package.outputs.identity_digest }}
+      prebuilt_artifact_destination: dist
+      package_check_command: npm run pack:dry-run
 
   e2e-validation:
+    needs: build-package
     permissions:
+      actions: read
       contents: read
       packages: read
-    uses: moritzbrantner/reusable-workflows/.github/workflows/e2e-validation.yml@workflow-standard-v1.3
+    uses: moritzbrantner/reusable-workflows/.github/workflows/e2e-validation.yml@544af51c921b09b4452b7346347ec9effa58f179
     with:
       node_version: "24.20.0"
       bun_version: ""
       install_command: npm ci
       pre_command: npx playwright install --with-deps chromium
-      e2e_command: npm run test:e2e
+      prebuilt_artifact_run_id: ${{ needs.build-package.outputs.producer_run_id }}
+      prebuilt_artifact_receipt_name: ${{ needs.build-package.outputs.receipt_artifact_name }}
+      prebuilt_artifact_name: ${{ needs.build-package.outputs.artifact_name }}
+      prebuilt_artifact_digest: ${{ needs.build-package.outputs.artifact_digest }}
+      prebuilt_source_sha: ${{ needs.build-package.outputs.source_sha }}
+      prebuilt_artifact_key: ${{ needs.build-package.outputs.artifact_key }}
+      prebuilt_identity_digest: ${{ needs.build-package.outputs.identity_digest }}
+      prebuilt_artifact_destination: dist
+      e2e_command: npm --prefix examples/playwright-react ci && npm --prefix examples/playwright-react test
       install_playwright: false
       cache_bun: false
       cache_node: true
