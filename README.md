@@ -6,6 +6,7 @@ Measure React render counts and render budgets in Playwright tests.
 
 - `RenderProfiler` records React Profiler commits for a subtree.
 - `withRenderCounter` records component function render calls.
+- `useRenderCounter` records render calls from inside a component, including renders it triggers itself.
 - Playwright helpers reset, read, diff, measure, and assert render budgets from the browser page.
 
 There is no global React patching, monkey-patching, automatic instrumentation, framework coupling, or hard-coded component naming. Apps only record stats where they explicitly render or wrap these helpers.
@@ -76,6 +77,24 @@ It increments the named component render count in the internal browser-page stat
 - `withRenderCounter` measures component function render calls, including calls that may not map one-to-one to committed subtree updates.
 
 Use component render counts for hot spots and diagnosis when subtree-level Profiler stats are too broad.
+
+### Counting self-triggered renders
+
+`withRenderCounter` counts calls of its wrapper, and the wrapper only runs when the parent renders it. A component that re-renders because of its own state, a context it reads, or an external store re-runs without its wrapper, so those renders are not counted.
+
+Call `useRenderCounter` inside the component to count every call of the component function, whatever triggered it:
+
+```tsx
+import { useRenderCounter } from "react-render-budget/react";
+
+function TimelineCursor() {
+  useRenderCounter("TimelineCursor");
+  const time = usePlaybackTime(); // context or store subscription
+  return <Cursor time={time} />;
+}
+```
+
+Both record into the same component budget targets, so budgets and helpers treat them alike. Use the same name for one target in one place only; duplicate names aggregate.
 
 ## Playwright Helpers
 
@@ -242,7 +261,7 @@ If multiple profilers use the same `id`, or multiple component wrappers use the 
 
 Run authoritative render-budget tests against a production-like build and calibrate budgets in the same environment where they are enforced. Profiler budgets require React's profiling-capable production bundle; a standard production React bundle may omit Profiler callbacks. Development React behavior, including StrictMode double invocation, can distort render counts compared with production builds.
 
-Concurrent rendering can start work that is later abandoned. `RenderProfiler` records committed Profiler events. `withRenderCounter` records component function calls, including calls that may not commit.
+Concurrent rendering can start work that is later abandoned. `RenderProfiler` records committed Profiler events. `withRenderCounter` and `useRenderCounter` record component function calls, including calls that may not commit.
 
 Use upper-bound budgets, not exact render counts. Render counts can change across React versions, development modes, and harmless implementation details.
 
@@ -254,6 +273,7 @@ Duration metrics such as `totalActualDuration` and `totalBaseDuration` are more 
 // react-render-budget/react
 export { RenderProfiler } from "react-render-budget/react";
 export { withRenderCounter } from "react-render-budget/react";
+export { useRenderCounter } from "react-render-budget/react";
 
 // react-render-budget/playwright
 export { resetRenderStats } from "react-render-budget/playwright";

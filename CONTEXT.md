@@ -37,7 +37,7 @@ A budget target recorded by `RenderProfiler` from committed React Profiler callb
 _Avoid_: Profiler instance, React subtree name
 
 **Component Budget Target**:
-A budget target recorded by `withRenderCounter` from wrapped component function calls.
+A budget target recorded by `withRenderCounter` from wrapped component function calls, or by `useRenderCounter` from calls of the component function that uses it.
 _Avoid_: Component instance, wrapper instance
 
 **Profiler Stats**:
@@ -45,7 +45,7 @@ Aggregated committed React Profiler data for a profiler budget target.
 _Avoid_: Render counter
 
 **Component Render Count**:
-The number of wrapped component function calls recorded for a component budget target.
+The number of component function calls recorded for a component budget target, through `withRenderCounter` or `useRenderCounter`.
 _Avoid_: Commit count, profiler count
 
 **Render Metadata**:
