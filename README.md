@@ -59,6 +59,8 @@ A budget target is the string key used for profiler stats or component render co
 
 Known targets are registered independently from their activity counts. This lets a budget distinguish a real zero-render result from a target name that was never instrumented.
 
+A **render stats snapshot** is the serializable view of profiler commits and component function-call counts collected during a window. A **budget assertion** compares that snapshot with upper bounds and reports a **budget violation** for each missing target or exceeded metric. A missing target is not an observed zero. Profiler instrumentation records committed work; component render counters can also include calls from abandoned concurrent renders. These are different metrics, not interchangeable names for the same event.
+
 ## Component Render Counter
 
 Use `withRenderCounter` when you need exact component function render calls:
