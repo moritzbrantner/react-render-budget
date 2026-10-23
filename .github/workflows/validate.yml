@@ -21,7 +21,7 @@ jobs:
       packages: read
     uses: moritzbrantner/reusable-workflows/.github/workflows/fast-validation.yml@3b15546083e66aeba487a2e653e3ffaacbfe7220 # workflow-standard-v1.3
     with:
-      node_version: "24.20.0"
+      node_version: lts/*
       bun_version: ""
       install_command: npm ci
       cache_bun: false
@@ -38,7 +38,7 @@ jobs:
       packages: read
     uses: moritzbrantner/reusable-workflows/.github/workflows/integration-validation.yml@3b15546083e66aeba487a2e653e3ffaacbfe7220 # workflow-standard-v1.3
     with:
-      node_version: "24.20.0"
+      node_version: lts/*
       bun_version: ""
       install_command: npm ci
       cache_bun: false
@@ -52,7 +52,7 @@ jobs:
       packages: read
     uses: moritzbrantner/reusable-workflows/.github/workflows/e2e-validation.yml@3b15546083e66aeba487a2e653e3ffaacbfe7220 # workflow-standard-v1.3
     with:
-      node_version: "24.20.0"
+      node_version: lts/*
       bun_version: ""
       install_command: npm ci
       pre_command: npx playwright install --with-deps chromium
