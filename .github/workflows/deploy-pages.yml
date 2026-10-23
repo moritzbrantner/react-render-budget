@@ -23,7 +23,7 @@ jobs:
     with:
       source_sha: ${{ github.sha }}
       artifact_key: react-render-budget-pages-v1
-      node_version: "24.20.0"
+      node_version: lts/*
       bun_version: ""
       cache_node: true
       npm_cache_dependency_path: package-lock.json
